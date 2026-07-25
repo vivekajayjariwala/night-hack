@@ -1,0 +1,7 @@
+# torch is installed separately in the Dockerfile via the CPU-only wheel index
+# (https://download.pytorch.org/whl/cpu) BEFORE this file is installed, so that
+# ultralytics' torch dependency is already satisfied and pip never pulls the
+# ~4GB CUDA build. Do not add torch here.
+ultralytics
+opencv-python-headless
+boto3
