@@ -2,6 +2,11 @@
 # (https://download.pytorch.org/whl/cpu) BEFORE this file is installed, so that
 # ultralytics' torch dependency is already satisfied and pip never pulls the
 # ~4GB CUDA build. Do not add torch here.
+#
+# NOTE: ultralytics transitively depends on the GUI `opencv-python` build no
+# matter what's listed here, so listing opencv-python-headless alone is NOT
+# enough to keep it out — the Dockerfile does an explicit uninstall +
+# force-reinstall pass after this file is installed. See Dockerfile comments.
 ultralytics
 opencv-python-headless
 boto3

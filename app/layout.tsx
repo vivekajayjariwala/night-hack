@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+        <TooltipProvider delay={200}>{children}</TooltipProvider>
       </body>
     </html>
   );

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import sys
 import time
@@ -45,6 +46,11 @@ except ImportError as e:  # pragma: no cover - dependency/setup error, not a bug
 
 
 def main() -> None:
+    # Surface pipeline.py's INFO-level logs (YOLO ball-detection rate before any
+    # fallback decision, which path was chosen, etc.) — this is the whole point
+    # of running this script for the hour-one YOLO-vs-HSV go/no-go validation.
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
     parser = argparse.ArgumentParser(
         description="Run the RefAI detection pipeline locally on a video file (no S3/AWS)."
     )

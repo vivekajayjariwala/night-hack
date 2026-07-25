@@ -5,6 +5,7 @@ export const SMOOTH_WINDOW = 3; // median filter taps
 export const MIN_FLIP_FRAMES = 3; // consecutive descending/ascending frames required around a bounce apex
 export const PHANTOM_WINDOW = 2; // apex must have a real (non-interpolated) detection within this many frames (Decision F6)
 export const ERROR_BOUND_M = 0.2; // calibration error bound in meters (~20cm at far baseline per corner-click precision estimate)
+export const MIN_FLIP_MAGNITUDE_PX = 20; // min net y-movement (px) over MIN_FLIP_FRAMES on each side of the apex — rejects gentle arcs (racket hits, lobs) per CEO review P4 "min magnitude" mitigation
 
 // Standard tennis court dimensions (meters).
 export const COURT = {
@@ -93,15 +94,36 @@ export function interpolateAndSmooth(frames: Frame[], smoothWindow = SMOOTH_WIND
 // image-coordinate sign bug).
 // ---------------------------------------------------------------------------
 
-/** Returns indices into `samples` where a validated bounce apex occurs. */
+/**
+ * Returns indices into `samples` where a validated bounce apex occurs.
+ *
+ * Two things beyond a plain sign-flip check, both required to match real
+ * (and realistically-synthetic) trajectories:
+ *
+ *  1. Non-strict monotonicity. A median-smoothed, near-symmetric peak (the
+ *     textbook clean bounce) reliably produces a 2-3 frame PLATEAU of equal
+ *     y at its apex — the true single-frame peak is exactly what a window-3
+ *     median filter discards as the outlier. Requiring strictly-increasing-
+ *     then-strictly-decreasing dy around the apex misses this common case
+ *     entirely, so adjacent frames of equal y are tolerated and adjacent
+ *     candidate indices are then collapsed into one event (below).
+ *  2. Minimum flip magnitude. A sign flip alone doesn't distinguish a sharp
+ *     ground bounce from a gentle in-air apex (racket redirect, lob peak) —
+ *     both are locally "descend then ascend." Real bounces have much higher
+ *     curvature (near-instant reversal on ground contact) than smooth
+ *     gravity-only arcs, so we additionally require the net y-movement over
+ *     the flip window, on both sides, to clear MIN_FLIP_MAGNITUDE_PX
+ *     (CEO review P4: "min magnitude" mitigation).
+ */
 export function findBounceIndices(
   samples: Sample[],
   minFlipFrames = MIN_FLIP_FRAMES,
   phantomWindow = PHANTOM_WINDOW,
+  minFlipMagnitudePx = MIN_FLIP_MAGNITUDE_PX,
 ): number[] {
   const n = samples.length;
-  const bounceIdx: number[] = [];
-  if (n < 2 * minFlipFrames + 1) return bounceIdx;
+  const candidates: number[] = [];
+  if (n < 2 * minFlipFrames + 1) return candidates;
 
   const dy: number[] = [];
   for (let i = 1; i < n; i++) dy.push(samples[i].pos.y - samples[i - 1].pos.y);
@@ -109,21 +131,23 @@ export function findBounceIndices(
   for (let i = minFlipFrames; i < n - minFlipFrames; i++) {
     let descending = true;
     for (let k = i - minFlipFrames; k < i; k++) {
-      if (dy[k] <= 0) {
+      if (dy[k] < 0) {
         descending = false;
         break;
       }
     }
     if (!descending) continue;
+    if (samples[i].pos.y - samples[i - minFlipFrames].pos.y < minFlipMagnitudePx) continue;
 
     let ascending = true;
     for (let k = i; k < i + minFlipFrames; k++) {
-      if (dy[k] >= 0) {
+      if (dy[k] > 0) {
         ascending = false;
         break;
       }
     }
     if (!ascending) continue;
+    if (samples[i].pos.y - samples[i + minFlipFrames].pos.y < minFlipMagnitudePx) continue;
 
     let hasReal = false;
     for (let k = Math.max(0, i - phantomWindow); k <= Math.min(n - 1, i + phantomWindow); k++) {
@@ -134,7 +158,23 @@ export function findBounceIndices(
     }
     if (!hasReal) continue;
 
-    bounceIdx.push(i);
+    candidates.push(i);
+  }
+
+  // Collapse a run of adjacent candidates (the apex plateau) into a single
+  // event at the true local max within the cluster.
+  const bounceIdx: number[] = [];
+  for (let c = 0; c < candidates.length; c++) {
+    if (c > 0 && candidates[c] - candidates[c - 1] === 1) continue; // already absorbed below
+    let clusterEnd = c;
+    while (clusterEnd + 1 < candidates.length && candidates[clusterEnd + 1] - candidates[clusterEnd] === 1) {
+      clusterEnd++;
+    }
+    let best = candidates[c];
+    for (let k = c; k <= clusterEnd; k++) {
+      if (samples[candidates[k]].pos.y > samples[best].pos.y) best = candidates[k];
+    }
+    bounceIdx.push(best);
   }
   return bounceIdx;
 }

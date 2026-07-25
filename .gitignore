@@ -43,3 +43,14 @@ next-env.d.ts
 # python
 __pycache__/
 *.pyc
+*.venv/
+venv/
+
+# claude code local-only settings (permissions accumulated this session)
+.claude/settings.local.json
+
+# YOLO weights auto-downloaded by scripts/run_local.py when run outside the
+# Lambda container (baked into the image at build time instead, see lambda/Dockerfile)
+*.pt
+Ultralytics/
+.gstack/
