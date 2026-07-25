@@ -5,7 +5,7 @@ export const SMOOTH_WINDOW = 3; // median filter taps
 export const MIN_FLIP_FRAMES = 3; // consecutive descending/ascending frames required around a bounce apex
 export const PHANTOM_WINDOW = 2; // apex must have a real (non-interpolated) detection within this many frames (Decision F6)
 export const ERROR_BOUND_M = 0.2; // calibration error bound in meters (~20cm at far baseline per corner-click precision estimate)
-export const MIN_FLIP_MAGNITUDE_PX = 20; // min net y-movement (px) over MIN_FLIP_FRAMES on each side of the apex — rejects gentle arcs (racket hits, lobs) per CEO review P4 "min magnitude" mitigation
+export const MIN_FLIP_MAGNITUDE_PX = 40; // min net y-movement (px) over MIN_FLIP_FRAMES on each side of the apex — rejects gentle arcs (racket hits, lobs) per CEO review P4 "min magnitude" mitigation. Raised from 20 — the HSV/frame-diff fallback tracker is jittery enough that 20px of noise alone could clear the old bar, over-firing bounce events.
 
 // Standard tennis court dimensions (meters).
 export const COURT = {

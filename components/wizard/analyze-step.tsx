@@ -83,6 +83,10 @@ export function AnalyzeStep({
       <Button variant="ghost" onClick={onCancel}>
         Cancel
       </Button>
+      <div className="max-w-sm rounded-md border border-border bg-secondary/50 px-3 py-2 text-xs text-muted-foreground">
+        Analysis can take 2+ minutes, especially right after a cold start — if it&apos;s been a
+        while, that&apos;s normal, not stuck.
+      </div>
     </div>
   );
 }

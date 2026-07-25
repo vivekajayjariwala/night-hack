@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Stepper, type WizardStep } from "@/components/wizard/stepper";
 import { UploadStep } from "@/components/wizard/upload-step";
 import { CalibrateStep } from "@/components/wizard/calibrate-step";
@@ -301,16 +302,52 @@ export function WizardApp() {
     if (lastFileRef.current) startUpload(lastFileRef.current);
   }, [startUpload]);
 
+  // Back-and-forth step navigation: a step is reachable if there's actually
+  // something to show there given current state. "Analyze" stops being
+  // reachable once results are ready — otherwise it'd fight the auto-advance
+  // effect above, which forces analyze -> review the instant results land.
+  const isStepReachable = useCallback(
+    (s: WizardStep): boolean => {
+      switch (s) {
+        case "upload":
+          return true;
+        case "calibrate":
+          return source !== null;
+        case "analyze":
+          return source !== null && resultsPhase !== "ready";
+        case "review":
+          return !!(source && results && corners);
+      }
+    },
+    [source, resultsPhase, results, corners],
+  );
+
+  const goToStep = useCallback(
+    (target: WizardStep) => {
+      if (target === "upload") {
+        resetAll();
+        return;
+      }
+      setStep(target);
+    },
+    [resetAll],
+  );
+
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="font-semibold tracking-tight">RefAI</span>
+      <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <button
+            type="button"
+            onClick={resetAll}
+            className="flex items-baseline gap-2.5 rounded-md cursor-pointer hover:opacity-80"
+            title="Start over"
+          >
+            <span className="text-lg font-semibold tracking-tight">Overruled</span>
             <span className="text-xs text-muted-foreground hidden sm:inline">Virtual tennis referee</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Stepper current={effectiveStep} />
+          </button>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Stepper current={effectiveStep} reachable={isStepReachable} onSelect={goToStep} />
             <Button
               size="sm"
               variant="ghost"
@@ -326,11 +363,12 @@ export function WizardApp() {
                     ? "Warm failed"
                     : "Warm up"}
             </Button>
+            <ThemeToggle />
           </div>
         </div>
       </header>
 
-      <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-8">
+      <main className="flex-1 mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-8">
         {effectiveStep === "upload" && (
           <UploadStep
             onSelectDemo={selectDemoClip}

@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-geist-sans);
   --color-call-in: var(--call-in);
   --color-call-in-foreground: var(--call-in-foreground);
   --color-call-out: var(--call-out);
@@ -54,12 +54,53 @@
 }
 
 /*
- * RefAI broadcast-dark theme (PLAN.md Decisions #19, #20, #30).
- * Single dark theme — near-black/dark-slate surface, chalk-white text, ONE
- * semantic accent pair (IN=green / OUT=red). No light mode: this is an app
- * that runs on a projector in a dark room, not a marketing site.
+ * Overruled theme (PLAN.md Decisions #19, #20, #30, amended for a light-mode
+ * toggle). Broadcast-dark is the default and primary look — near-black
+ * surface, chalk-white text, ONE semantic accent pair (IN=green / OUT=red) —
+ * with a light variant for anyone who'd rather not run the app dark.
  */
-:root,
+:root {
+  --background: oklch(0.99 0.003 255);
+  --foreground: oklch(0.17 0.012 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.012 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.012 255);
+  --primary: oklch(0.17 0.012 255);
+  --primary-foreground: oklch(0.99 0.003 255);
+  --secondary: oklch(0.95 0.004 255);
+  --secondary-foreground: oklch(0.17 0.012 255);
+  --muted: oklch(0.95 0.004 255);
+  --muted-foreground: oklch(0.47 0.012 255);
+  --accent: oklch(0.95 0.004 255);
+  --accent-foreground: oklch(0.17 0.012 255);
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0 0 0 / 12%);
+  --ring: oklch(0.6 0.012 255);
+  --chart-1: oklch(0.4 0 0);
+  --chart-2: oklch(0.5 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.7 0 0);
+  --chart-5: oklch(0.8 0 0);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.97 0.003 255);
+  --sidebar-foreground: oklch(0.17 0.012 255);
+  --sidebar-primary: oklch(0.17 0.012 255);
+  --sidebar-primary-foreground: oklch(0.99 0.003 255);
+  --sidebar-accent: oklch(0.95 0.004 255);
+  --sidebar-accent-foreground: oklch(0.17 0.012 255);
+  --sidebar-border: oklch(0 0 0 / 10%);
+  --sidebar-ring: oklch(0.6 0.012 255);
+
+  /* Semantic call colors — the ONLY accent pair in this UI (#19, #20). */
+  --call-in: oklch(0.55 0.19 145);
+  --call-in-foreground: oklch(0.99 0.01 145);
+  --call-out: oklch(0.58 0.22 27);
+  --call-out-foreground: oklch(0.99 0.01 27);
+  --court-line: oklch(0.17 0.012 255);
+}
+
 .dark {
   --background: oklch(0.15 0.012 255);
   --foreground: oklch(0.96 0.002 255);
@@ -111,6 +152,9 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+  }
+  html.dark {
     color-scheme: dark;
   }
 }

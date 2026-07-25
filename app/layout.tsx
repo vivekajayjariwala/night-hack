@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RefAI — Virtual Tennis Referee",
+  title: "Overruled — Virtual Tennis Referee",
   description: "Upload a tennis clip and get automatic IN/OUT line calls.",
 };
 
@@ -26,10 +27,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <TooltipProvider delay={200}>{children}</TooltipProvider>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <TooltipProvider delay={200}>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

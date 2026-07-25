@@ -1,8 +1,8 @@
 [
   {
-    "id": "pexels-8224092",
-    "title": "Baseline rally (Pexels)",
-    "videoPath": "/demo/raw/pexels-8224092-girls-tennis.mp4",
-    "resultsPath": "/demo/pexels-8224092.json"
+    "id": "demo-tennis-clip",
+    "title": "Practice rally",
+    "videoPath": "/demo/raw/demo_tennis_clip.mp4",
+    "resultsPath": "/demo/demo_tennis_clip.json"
   }
 ]

@@ -9,16 +9,35 @@ const STEPS: { key: WizardStep; label: string }[] = [
   { key: "review", label: "Review" },
 ];
 
-export function Stepper({ current }: { current: WizardStep }) {
+export function Stepper({
+  current,
+  reachable,
+  onSelect,
+}: {
+  current: WizardStep;
+  reachable?: (step: WizardStep) => boolean;
+  onSelect?: (step: WizardStep) => void;
+}) {
   const currentIdx = STEPS.findIndex((s) => s.key === current);
 
   return (
     <ol className="flex items-center gap-2 sm:gap-3" aria-label="Progress">
       {STEPS.map((s, i) => {
         const state = i < currentIdx ? "done" : i === currentIdx ? "current" : "upcoming";
+        const canJump = state !== "current" && (reachable?.(s.key) ?? false) && !!onSelect;
         return (
           <li key={s.key} className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={!canJump}
+              onClick={() => canJump && onSelect?.(s.key)}
+              className={cn(
+                "flex items-center gap-2 rounded-md",
+                canJump && "cursor-pointer hover:opacity-80",
+                !canJump && "cursor-default",
+              )}
+              aria-current={state === "current" ? "step" : undefined}
+            >
               <span
                 className={cn(
                   "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium t-mono",
@@ -26,7 +45,6 @@ export function Stepper({ current }: { current: WizardStep }) {
                   state === "current" && "border-2 border-foreground text-foreground",
                   state === "upcoming" && "border border-border text-muted-foreground",
                 )}
-                aria-current={state === "current" ? "step" : undefined}
               >
                 {i + 1}
               </span>
@@ -38,7 +56,7 @@ export function Stepper({ current }: { current: WizardStep }) {
               >
                 {s.label}
               </span>
-            </div>
+            </button>
             {i < STEPS.length - 1 && (
               <div className={cn("h-px w-6 sm:w-10", state === "done" ? "bg-foreground" : "bg-border")} />
             )}

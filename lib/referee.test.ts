@@ -23,7 +23,7 @@ function syntheticBounce(bounceT: number, opts: { withGaps?: boolean; racketHit?
   const duration = 1.0; // 1s window centered on the bounce
   const start = bounceT - duration / 2;
   const peakY = 800; // screen-y at the bounce apex (near ground/bottom of frame)
-  const apexSharpness = 4000; // px per s^2
+  const apexSharpness = 8000; // px per s^2 — sharp enough to clear MIN_FLIP_MAGNITUDE_PX after smoothing
 
   for (let f = 0; f <= duration * fps; f++) {
     const t = start + f / fps;
