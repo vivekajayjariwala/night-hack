@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { computeEvents, nearestIndexByTime } from "@/lib/referee";
 import type { BounceEvent, CourtCorners, Results } from "@/lib/types";
 import {
@@ -24,10 +25,12 @@ export function ReviewStep({
   videoUrl,
   results,
   corners,
+  onStartOver,
 }: {
   videoUrl: string;
   results: Results;
   corners: CourtCorners;
+  onStartOver: () => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -191,6 +194,12 @@ export function ReviewStep({
 
   return (
     <div className="mx-auto w-full max-w-5xl flex flex-col gap-4">
+      <div className="flex justify-end">
+        <Button size="sm" variant="secondary" onClick={onStartOver}>
+          Start over
+        </Button>
+      </div>
+
       {results.meta.lowDetection && (
         <div className="rounded-md border border-call-out/50 bg-call-out/10 px-3 py-2 text-sm text-call-out">
           Couldn&apos;t track the ball reliably — try a clearer clip.

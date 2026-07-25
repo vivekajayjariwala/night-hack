@@ -59,8 +59,6 @@ export function WizardApp() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const lastFileRef = useRef<File | null>(null);
 
-  const [warmStatus, setWarmStatus] = useState<"idle" | "warming" | "done" | "error">("idle");
-
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollDeadlineRef = useRef<number | null>(null);
   const recoveredRef = useRef(false);
@@ -286,16 +284,6 @@ export function WizardApp() {
     startPolling(jobId);
   }, [jobId, source, selectDemoClip, startPolling]);
 
-  const triggerWarmPing = useCallback(async () => {
-    setWarmStatus("warming");
-    try {
-      const res = await fetch("/api/warm", { method: "POST" });
-      setWarmStatus(res.ok ? "done" : "error");
-    } catch {
-      setWarmStatus("error");
-    }
-  }, []);
-
   const analyzePhase: AnalyzePhase = resultsPhase === "timeout" ? "timeout" : resultsPhase === "error" ? "error" : "polling";
 
   const retryUpload = useCallback(() => {
@@ -348,21 +336,6 @@ export function WizardApp() {
           </button>
           <div className="flex items-center gap-3 sm:gap-4">
             <Stepper current={effectiveStep} reachable={isStepReachable} onSelect={goToStep} />
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={triggerWarmPing}
-              disabled={warmStatus === "warming"}
-              title="Send a warm-up ping to the inference function before a live demo"
-            >
-              {warmStatus === "warming"
-                ? "Warming…"
-                : warmStatus === "done"
-                  ? "Warmed"
-                  : warmStatus === "error"
-                    ? "Warm failed"
-                    : "Warm up"}
-            </Button>
             <ThemeToggle />
           </div>
         </div>
@@ -406,7 +379,7 @@ export function WizardApp() {
           ))}
 
         {effectiveStep === "review" && source && results && corners && (
-          <ReviewStep videoUrl={source.videoUrl} results={results} corners={corners} />
+          <ReviewStep videoUrl={source.videoUrl} results={results} corners={corners} onStartOver={resetAll} />
         )}
       </main>
     </div>

@@ -77,7 +77,19 @@ export function UploadStep({
                 className="group text-left rounded-md overflow-hidden border border-border bg-card hover:border-foreground/50 transition-colors"
               >
                 <div className="aspect-video bg-secondary relative overflow-hidden">
-                  <video src={clip.videoPath} className="w-full h-full object-cover" muted preload="metadata" />
+                  <video
+                    src={clip.videoPath}
+                    className="w-full h-full object-cover"
+                    muted
+                    preload="metadata"
+                    onLoadedMetadata={(e) => {
+                      const v = e.currentTarget;
+                      // Show a frame a couple seconds in (or halfway, for very short
+                      // clips) instead of frame 0 — first frames are often a blank
+                      // court or a pan, not representative of the clip.
+                      v.currentTime = Math.min(2, (v.duration || 0) / 2);
+                    }}
+                  />
                 </div>
                 <div className="p-3">
                   <div className="font-medium text-sm">{clip.title}</div>
