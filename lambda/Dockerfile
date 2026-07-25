@@ -20,9 +20,24 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 
 COPY requirements.txt .
 
-# CPU-only torch FIRST, via the CPU wheel index, so ultralytics' torch dependency
-# is already satisfied and pip never resolves the default CUDA-enabled build
-# (~4GB of wheels we don't need on a CPU-only Lambda).
+# CPU-only torch + torchvision FIRST, TOGETHER, from the same CPU wheel index,
+# so ultralytics' dependency on both is already satisfied and pip never pulls
+# either from the default index.
+#
+# IMPORTANT (found via a live Lambda test invocation — the local venv test
+# didn't catch this because pip happened to resolve a compatible pair there):
+# torch and torchvision are ABI-coupled — torchvision ships compiled ops (like
+# nms) that must be built against the exact torch version/flavor installed.
+# Installing only `torch` from the CPU index here, then letting
+# `pip install -r requirements.txt` pull in ultralytics' torchvision dependency
+# from the DEFAULT index, resolves a torchvision build that doesn't match this
+# torch build — fails at runtime with "operator torchvision::nms does not
+# exist", not at install time. Fix: install torch AND torchvision together,
+# both from the CPU index, in the SAME pip command, before requirements.txt is
+# installed — resolving them together lets pip pick a compatible pair from
+# that index, rather than resolving torchvision separately (and later) against
+# the default index. A build-time smoke test below actually calls
+# torchvision.ops.nms so a future mismatch fails the build, not a live invoke.
 #
 # IMPORTANT (verified locally): ultralytics declares a transitive dependency on
 # the GUI `opencv-python` build regardless of what's in requirements.txt, so a
@@ -32,10 +47,11 @@ COPY requirements.txt .
 # breaks in Lambda (missing libGL etc.) even when it doesn't win that race. Fix:
 # after normal resolution, explicitly uninstall opencv-python and force-reinstall
 # opencv-python-headless so only the headless build's files are on disk.
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu \
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
  && pip install --no-cache-dir -r requirements.txt \
  && pip uninstall -y opencv-python \
- && pip install --no-cache-dir --force-reinstall --no-deps opencv-python-headless
+ && pip install --no-cache-dir --force-reinstall --no-deps opencv-python-headless \
+ && python3 -c "import torch, torchvision; from torchvision.ops import nms; import torch as t; nms(t.zeros((1,4)), t.zeros(1), 0.5); print('torch', torch.__version__, 'torchvision', torchvision.__version__, 'nms OK')"
 
 # Bake the YOLOv8n weights into the image at build time (avoids a network fetch
 # adding to cold start). ultralytics saves 'yolov8n.pt' to the current working
