@@ -4,20 +4,15 @@
 
 Upload a short clip (or try a demo clip), click the four corners of the court once, and Overruled tracks the players and the ball, detects every bounce, and calls it **IN**, **OUT**, or **TOO CLOSE** — with the margin down to the centimeter. Live at **[night-hack-beta.vercel.app](https://night-hack-beta.vercel.app)**.
 
-<!--
-  Screenshots: drop image files into docs/screenshots/ using the filenames
-  referenced below and these will render automatically on GitHub.
--->
-
 ## Screenshots
 
-| Upload | Calibrate | Review |
+| Upload | Calibrate | Review — video &amp; timeline |
 | --- | --- | --- |
-| ![Upload step](docs/screenshots/upload.png) | ![Calibrate step](docs/screenshots/calibrate.png) | ![Review step](docs/screenshots/review.png) |
+| ![Upload step](docs/screenshots/upload-page-dark-mode.png) | ![Calibrate step](docs/screenshots/calibrate-page-dark-mode.png) | ![Review step, video and timeline](docs/screenshots/review-page-video-timeline-dark-mode.png) |
 
-| Dark mode | Light mode |
+| Review — mini-court replay | Light mode |
 | --- | --- |
-| ![Dark mode](docs/screenshots/dark-mode.png) | ![Light mode](docs/screenshots/light-mode.png) |
+| ![Review step, top-down mini-court replay](docs/screenshots/review-page-court-diagram-dark-mode.png) | ![Upload step in light mode](docs/screenshots/upload-page-light-mode.png) |
 
 ## Why we built it
 
